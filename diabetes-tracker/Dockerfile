@@ -1,14 +1,10 @@
-# Base image: Java 21 (Eclipse Temurin)
-FROM eclipse-temurin:21-jdk-jammy
-
-# İş qovluğu konteynerdə
+FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
 
-# Jar faylını konteynerə kopyala
-COPY target/diabetes-tracker-0.0.1-SNAPSHOT.jar app.jar
-
-# Portu aç (layihənin işlədiyi port)
+FROM eclipse-temurin:21-jdk-alpine
+WORKDIR /app
+COPY --from=build /app/target/diabetes-tracker-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
-
-# Konteyner başladanda bu komanda işə düşəcək
 ENTRYPOINT ["java", "-jar", "app.jar"]
